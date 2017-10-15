@@ -254,7 +254,6 @@ public class VietCalendar {
         return can[mod]+" "+chi[mLunarMonth-1];
     }
 
-
     public static String getLunarYear(int yy){
         int mYear = yy;
         String[] can = new String[] {"Giap", "At","Binh","Dinh","Mau","Ki","Canh","Tan","Nham","Qui"};
@@ -262,6 +261,25 @@ public class VietCalendar {
         return can[(mYear+6)%10] +" "+chi[(mYear+8)%12];
     }
 
+
+    public static int[] getDateLuna(String dateSolar) {
+        double Tz = 7.0;
+        String[] separatedTime = dateSolar.split("-");
+        int dateValue = Integer.parseInt(separatedTime[2].replaceFirst("^0*", ""));
+        int monthValue =  Integer.parseInt(separatedTime[1]);
+        int yearValue =  Integer.parseInt(separatedTime[0]);
+        int start = VietCalendar.jdFromDate(dateValue,monthValue, yearValue);
+        int step = 0;
+        int count = -1;
+        int jd = start + step * count;
+        int[] s = VietCalendar.jdToDate(jd);
+        int[] l = VietCalendar.convertSolar2Lunar(s[0], s[1], s[2], Tz);
+        int[] s2 = VietCalendar.convertLunar2Solar(l[0], l[1], l[2], l[3], Tz);
+        return l;
+    }
+
+
+   // public static void Covert
  //  public static void main(String[] args) {
  //      double TZ = 7.0;
  //      int start = jdFromDate(1, 1, 2017);

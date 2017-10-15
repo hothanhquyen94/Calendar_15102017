@@ -42,16 +42,16 @@ public class CalendarAdapter extends BaseAdapter {
     int mnthlength;
     String itemvalue, curentDateString;
     DateFormat df;
-
+    TextView txt;
     private ArrayList<String> items;
     public static List<String> day_string;
     private View previousView;
-    public ArrayList<CalendarCollection>  date_collection_arr;
+    public ArrayList<CalendarCollection> date_collection_arr;
 
-    public CalendarAdapter(Context context, GregorianCalendar monthCalendar,ArrayList<CalendarCollection> date_collection_arr) {
-        this.date_collection_arr=date_collection_arr;
+    public CalendarAdapter(Context context, GregorianCalendar monthCalendar, ArrayList<CalendarCollection> date_collection_arr) {
+        this.date_collection_arr = date_collection_arr;
         CalendarAdapter.day_string = new ArrayList<String>();
-        Locale.setDefault(Locale.US);
+        //Locale.setDefault(Locale.US);
         month = monthCalendar;
         selectedDate = (GregorianCalendar) monthCalendar.clone();
         this.context = context;
@@ -89,7 +89,7 @@ public class CalendarAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View v = convertView;
         TextView dayView;
-        TextView dayquyen;
+        TextView dayLuna;
         if (convertView == null) { // if it's not recycled, initialize some
             // attributes
             LayoutInflater vi = (LayoutInflater) context
@@ -99,23 +99,34 @@ public class CalendarAdapter extends BaseAdapter {
         }
 
         //quyen
-        dayquyen = (TextView) v.findViewById(R.id.dateLuna);
+        dayLuna = (TextView) v.findViewById(R.id.dateLuna);
         dayView = (TextView) v.findViewById(R.id.date);
         String[] separatedTime = day_string.get(position).split("-");
-
+        int[] dateLuna = VietCalendar.getDateLuna(day_string.get(position));
 
         String gridvalue = separatedTime[2].replaceFirst("^0*", "");
+        String tenNamAmLich = VietCalendar.getLunarYear(Integer.parseInt(separatedTime[0]));
         if ((Integer.parseInt(gridvalue) > 1) && (position < firstDay)) {
             dayView.setTextColor(Color.GRAY);
             dayView.setClickable(false);
             dayView.setFocusable(false);
+
+            dayLuna.setTextColor(Color.GRAY);
+            dayLuna.setClickable(false);
+            dayLuna.setFocusable(false);
+
         } else if ((Integer.parseInt(gridvalue) < 7) && (position > 28)) {
             dayView.setTextColor(Color.GRAY);
             dayView.setClickable(false);
             dayView.setFocusable(false);
+
+            dayLuna.setTextColor(Color.GRAY);
+            dayLuna.setClickable(false);
+            dayLuna.setFocusable(false);
         } else {
             // setting curent month's days in blue color.
             dayView.setTextColor(Color.WHITE);
+            dayLuna.setTextColor(Color.WHITE);
         }
 
 
@@ -126,9 +137,14 @@ public class CalendarAdapter extends BaseAdapter {
             v.setBackgroundColor(Color.parseColor("#343434"));
         }
 
+        dayView.setText(gridvalue);
+        if(dateLuna[0]==1){
+            dayLuna.setTextColor(Color.RED);
+            dayLuna.setText(dateLuna[0]+"/"+dateLuna[1]);
+        }else {
+            dayLuna.setText(dateLuna[0] + "");
+        }
 
-        dayView.setText(gridvalue+"");
-        dayquyen.setText("aaaa");
 
         // create date string for comparison
         String date = day_string.get(position);
@@ -141,38 +157,32 @@ public class CalendarAdapter extends BaseAdapter {
             monthStr = "0" + monthStr;
         }
 
-        // show icon if date is not empty and it exists in the items array
-        /*ImageView iw = (ImageView) v.findViewById(R.id.date_icon);
-        if (date.length() > 0 && items != null && items.contains(date)) {
-            iw.setVisibility(View.VISIBLE);
-        } else {
-            iw.setVisibility(View.GONE);
-        }
-        */
 
-        setEventView(v, position,dayView);
+
+        setEventView(v, position, dayView);
 
         return v;
     }
 
-    public View setSelected(View view,int pos) {
+    public View setSelected(View view, int pos) {
         if (previousView != null) {
             previousView.setBackgroundColor(Color.parseColor("#343434"));
         }
 
         view.setBackgroundColor(Color.CYAN);
 
-        int len=day_string.size();
-        if (len>pos) {
+        int len = day_string.size();
+        if (len > pos) {
             if (day_string.get(pos).equals(curentDateString)) {
 
-            }else{
+            } else {
 
                 previousView = view;
 
             }
 
         }
+
 
         return view;
     }
@@ -181,7 +191,7 @@ public class CalendarAdapter extends BaseAdapter {
         // clear items
         items.clear();
         day_string.clear();
-        Locale.setDefault(Locale.US);
+        //Locale.setDefault(Locale.US);
         pmonth = (GregorianCalendar) month.clone();
         // month start day. ie; sun, mon, etc
         firstDay = month.get(GregorianCalendar.DAY_OF_WEEK);
@@ -226,16 +236,14 @@ public class CalendarAdapter extends BaseAdapter {
     }
 
 
+    public void setEventView(View v, int pos, TextView txt) {
 
-
-    public void setEventView(View v,int pos,TextView txt){
-
-        int len=CalendarCollection.date_collection_arr.size();
+        int len = CalendarCollection.date_collection_arr.size();
         for (int i = 0; i < len; i++) {
-            CalendarCollection cal_obj=CalendarCollection.date_collection_arr.get(i);
-            String date=cal_obj.date;
-            int len1=day_string.size();
-            if (len1>pos) {
+            CalendarCollection cal_obj = CalendarCollection.date_collection_arr.get(i);
+            String date = cal_obj.date;
+            int len1 = day_string.size();
+            if (len1 > pos) {
 
                 if (day_string.get(pos).equals(date)) {
                     v.setBackgroundColor(Color.parseColor("#343434"));
@@ -243,44 +251,43 @@ public class CalendarAdapter extends BaseAdapter {
 
                     txt.setTextColor(Color.WHITE);
                 }
-            }}
-
+            }
+        }
 
 
     }
 
 
-    public void getPositionList(String date,final Activity act){
+    public void getPositionList(String date, final Activity act) {
 
-        int len=CalendarCollection.date_collection_arr.size();
+        int len = CalendarCollection.date_collection_arr.size();
         for (int i = 0; i < len; i++) {
-            CalendarCollection cal_collection=CalendarCollection.date_collection_arr.get(i);
-            String event_date=cal_collection.date;
+            CalendarCollection cal_collection = CalendarCollection.date_collection_arr.get(i);
+            String event_date = cal_collection.date;
 
-            String event_message=cal_collection.event_message;
+            String event_message = cal_collection.event_message;
 
             if (date.equals(event_date)) {
 
-                Toast.makeText(context, "You have event on this date: "+event_date, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "You have event on this date: " + event_date, Toast.LENGTH_LONG).show();
                 new AlertDialog.Builder(context)
                         .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle("Date: "+event_date)
-                        .setMessage("Event: "+event_message)
-                        .setPositiveButton("OK",new android.content.DialogInterface.OnClickListener(){
-                            public void onClick(DialogInterface dialog, int which)
-                            {
+                        .setTitle("Date: " + event_date)
+                        .setMessage("Event: " + event_message)
+                        .setPositiveButton("OK", new android.content.DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
                                 act.finish();
                             }
                         }).show();
                 break;
-            }else{
+            } else {
 
-
-            }}
-
+            }
+        }
 
 
     }
+
 
 }
 
